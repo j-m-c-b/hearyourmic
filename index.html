@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Microphone Audio Playback</title>
+</head>
+<body>
+    <h1>Real-Time Microphone Audio Playback</h1>
+    <button id="startButton">Start</button>
+    <button id="stopButton" disabled>Stop</button>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+
+        let audioContext;
+        let microphone;
+        let audioStream;
+
+        startButton.addEventListener('click', async () => {
+            startButton.disabled = true;
+            stopButton.disabled = false;
+
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            microphone = audioContext.createMediaStreamSource(audioStream);
+            const audioDestination = audioContext.destination;
+
+            microphone.connect(audioDestination);
+        });
+
+        stopButton.addEventListener('click', () => {
+            startButton.disabled = false;
+            stopButton.disabled = true;
+
+            microphone.disconnect(audioContext.destination);
+            audioStream.getTracks().forEach(track => track.stop());
+            audioContext.close();
+        });
+    </script>
+</body>
+</html>
